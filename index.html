@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Rally</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background-color: #0f380f;
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            color: #f0f0f0;
+            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .scoreboard {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 2px solid #fff;
+            display: none;
+            font-size: 0.9rem;
+            transition: all 0.5s ease;
+        }
+
+        .scoreboard.visible {
+            display: flex;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        .score-row {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .score {
+            font-size: 1rem;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .score-highlight {
+            color: #ffcc00;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+		
+		.poem-heading {
+    font-weight: 1000;
+    color: #ff4d6d;
+    letter-spacing: 0.5px;
+}
+
+.match-status {
+    font-size: 1rem;
+    color: #ffffff;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+.match-live {
+    color: #d94b68;
+    text-shadow: 0 0 8px rgba(217, 75, 104, 0.35);
+}
+
+        .countdown {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            z-index: 1000;
+            font-size: 0.85rem;
+            color: #fff;
+            transition: all 0.5s ease;
+        }
+
+        .countdown.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 600px;
+            padding: 2rem;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.5s ease;
+            margin-top: 60px;
+            position: relative;
+        }
+
+        /* SPECIAL STYLING ONLY FOR "FOR YOU" CARD */
+        .note-container {
+            max-width: 700px;
+            background: rgba(255, 228, 236, 0.92);
+            border: 1px solid rgba(255, 210, 222, 0.95);
+            box-shadow: 0 18px 45px rgba(0,0,0,0.38);
+            padding: 2.8rem 2.2rem;
+            backdrop-filter: blur(6px);
+            border-radius: 26px;
+        }
+		.note-container h2 {
+    font-size: 2.2rem;
+    color: #6b3147;
+    letter-spacing: 0.4px;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+}
+
+        .note-container p {
+            font-size: 1.05rem;
+            line-height: 2;
+            text-align: left;
+            color: #4a3830;
+            padding: 0 0.5rem;
+        }
+
+        .note-container .highlight {
+            color: #8b3d57;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(139, 61, 87, 0.35);
+        }
+
+        .note-container .btn {
+            background: #3a5f3a;
+            color: #fffaf5;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.22);
+        }
+
+        .note-container .btn:hover {
+            background: #2f4d2f;
+            transform: translateY(-3px);
+        }
+
+        h1, h2 {
+            font-weight: 300;
+            letter-spacing: -0.5px;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            line-height: 1.8;
+            color: #e0e0e0;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            padding: 14px 35px;
+            background: #fff;
+            color: #0f380f;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            background: #f0f0f0;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.8s ease;
+            width: 100%;
+        }
+
+        .section.active {
+            display: flex;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .poem-line {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.6s ease;
+            margin-bottom: 1.2rem;
+            font-size: 1.15rem;
+            line-height: 1.8;
+            font-style: italic;
+        }
+
+        .poem-line.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .shuttle {
+            font-size: 1.2rem;
+            position: absolute;
+            top: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: float 3s ease-in-out infinite;
+            opacity: 0.5;
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.1s;
+        }
+
+        .shuttle:active {
+            transform: translateX(-50%) scale(0.7);
+        }
+
+        @keyframes float {
+            0% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-12px); }
+            100% { transform: translateX(-50%) translateY(0); }
+        }
+
+        .highlight {
+            color: #fff;
+            font-weight: 500;
+            text-decoration: underline;
+        }
+
+        .birthday-highlight {
+            font-size: 1.5rem;
+            color: #ff69b4;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(255, 105, 180, 0.8), 0 0 40px rgba(255, 105, 180, 0.5);
+            animation: glow 2s ease-in-out infinite alternate;
+            display: block;
+            margin: 1rem 0;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(255, 105, 180, 0.8), 0 0 40px rgba(255, 105, 180, 0.5); }
+            to { text-shadow: 0 0 30px rgba(255, 105, 180, 1), 0 0 60px rgba(255, 105, 180, 0.7); }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.5rem;
+                width: 90%;
+            }
+
+            .note-container {
+                padding: 2rem 1.3rem;
+                border-radius: 22px;
+            }
+
+            .note-container p {
+                font-size: 1rem;
+                line-height: 1.9;
+                padding: 0;
+            }
+
+            .poem-line {
+                font-size: 1rem;
+            }
+
+            .scoreboard {
+                font-size: 0.75rem;
+            }
+
+            .score-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .birthday-highlight {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scoreboard" id="scoreboard">
+        <div class="score-row">
+            <span class="score">You: <span class="score-highlight">21</span></span>
+            <span class="match-status">Match: <span class="match-live">Ongoing</span></span>
+            <span class="score">Me: <span class="score-highlight">21</span></span>
+        </div>
+    </div>
+
+    <div class="countdown" id="countdown"></div>
+
+    <div id="landing" class="section active">
+        <div class="container">
+            <div class="shuttle" id="shuttle">🏸</div>
+            <h1>Our Rally</h1>
+            <p>Come, I made this for you ❤️</p>
+            <button class="btn" onclick="startRally()">Tap to Start</button>
+        </div>
+    </div>
+
+    <div id="poem" class="section">
+        <div class="container">
+            <div class="shuttle" id="shuttle">🏸</div>
+            <h2 class="poem-heading">Us</h2>
+            <div id="poem-container"></div>
+            <br>
+            <button class="btn" onclick="finishRally()">Keep the Rally Going</button>
+        </div>
+    </div>
+
+    <div id="note" class="section">
+        <div class="container note-container">
+            <div class="shuttle" id="shuttle">🏸</div>
+            <h2>For you</h2>
+            <br>
+
+            <p>
+                You said we didn’t travel much, but I think otherwise.<br>
+                We stayed close all these years,<br>
+                saw and went through all the phases,<br>
+                and even if we were not beside each other,<br>
+                we still felt closer for sure.<br><br>
+
+                You say “in another lifetime,”<br>
+                but I feel and wish that you are mine in every lifetime.<br><br>
+
+                You are the person I go to<br>
+                whenever I have extreme emotions flowing through me <br>
+                be it happiness or sadness.<br>
+                Sharing things with you makes happiness feel double happier<br>
+                and sadness feel much, much lighter.<br><br>
+
+                I am not saying this just on the fly.<br>
+                I have felt it with you,<br>
+                and I can feel it ONLY with you.<br><br>
+
+                No matter how many people I share things with,<br>
+                it always feels incomplete without sharing them with you.<br><br>
+
+                You’re the person I want to tell things to,<br>
+                the person I look for in my day.<br><br>
+
+                Life might change a lot this year,<br>
+                but I just hope one thing never does <br>
+                <span class="highlight">us being this close.</span><br><br>
+
+                That’s my only wish.<br><br>
+
+                To my most favourite human,<br>
+                Happy Birthday ❤️<br>
+                I wish you many, many, many, many, many more happy returns of the day,<br>
+                and to be a part of each of them.<br><br>
+<span class="signature">— Your girl</span>
+            </p>
+
+            <br>
+            <button class="btn" onclick="celebrate()">Continue ❤️</button>
+        </div>
+    </div>
+
+    <div id="final" class="section">
+        <div class="container">
+            <div class="shuttle" id="shuttle">🏸</div>
+            <h2>The Game Continues...</h2>
+            <br>
+            <p>
+                You make my life lighter,<br>
+                softer,<br>
+                and so much more beautiful.<br><br>
+
+                I’m really lucky to have you.<br><br>
+
+                <span class="highlight">And I hope we stay this close, no matter what.</span><br><br>
+
+                <span class="birthday-highlight">Happy Birthday, My Love ❤️</span>
+            </p>
+            <br>
+            <button class="btn" onclick="location.reload()">Go Back to Us ❤️</button>
+        </div>
+    </div>
+
+    <div id="hidden-message" class="section">
+        <div class="container">
+            <h2>🤫 Secret Message</h2>
+            <p>You found the hidden rally! <br> The best games are the ones we don't see coming.</p>
+            <button class="btn" onclick="location.reload()">Back to Court</button>
+        </div>
+    </div>
+
+    <audio id="smash-sound" src="https://assets.mixkit.co/active_storage/sfx/2578/2578-preview.mp3"></audio>
+
+    <script>
+        const poemLines = [
+            "At first, it felt like a casual rally.",
+            "Just a few exchanges.",
+            "Nothing too deep.",
+            "Nothing too serious.",
+            "",
+            "Just small talks,",
+            "little moments,",
+            "and time passing between us.",
+            "",
+            "But somewhere along the way,",
+            "the game changed without either of us saying it.",
+            "",
+            "The silences got easier.",
+            "The comfort got deeper.",
+            "And being around you started to feel natural.",
+            "",
+            "Like that one rally you never want to end ",
+            "easy, steady,",
+            "and somehow always bringing you back."
+        ];
+
+        function updateCountdown() {
+            const birthday = new Date('2026-01-15T00:00:00');
+            const now = new Date();
+            const diff = birthday - now;
+
+            if (diff <= 0) {
+                document.getElementById('countdown').style.display = 'none';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('countdown').textContent = 
+                `Next Birthday: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        function startRally() {
+            showSection('poem');
+            revealPoem();
+        }
+
+        function finishRally() {
+            showSection('note');
+        }
+
+        function celebrate() {
+            showSection('final');
+            showScoreboard();
+            hideCountdown();
+            playSmashSound();
+            launchConfetti();
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            document.getElementById(id).classList.add('active');
+        }
+
+        function showScoreboard() {
+            document.getElementById('scoreboard').classList.add('visible');
+        }
+
+        function hideCountdown() {
+            document.getElementById('countdown').classList.add('hidden');
+        }
+
+        function revealPoem() {
+            const container = document.getElementById('poem-container');
+            container.innerHTML = '';
+
+            poemLines.forEach((line, index) => {
+                const p = document.createElement('p');
+                p.className = 'poem-line';
+                p.textContent = line;
+                container.appendChild(p);
+
+                setTimeout(() => {
+                    p.classList.add('visible');
+                }, index * 700);
+            });
+        }
+
+        function playSmashSound() {
+            const smashSound = document.getElementById('smash-sound');
+            smashSound.currentTime = 0;
+            smashSound.play().catch(e => console.log('Audio play failed:', e));
+        }
+
+        function launchConfetti() {
+            const colors = ['🎉', '🎈', '🎊', '🏸', '❤️'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.textContent = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.position = 'fixed';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10vh';
+                confetti.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                confetti.style.animation = `fall ${Math.random() * 3 + 2}s linear`;
+                document.body.appendChild(confetti);
+
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+
+        let shuttleClicks = 0;
+        const shuttle = document.getElementById('shuttle');
+
+        shuttle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            shuttleClicks++;
+            
+            shuttle.style.transform = 'translateX(-50%) scale(0.5)';
+            setTimeout(() => {
+                shuttle.style.transform = 'translateX(-50%) scale(1)';
+            }, 100);
+
+            if (shuttleClicks === 5) {
+                showSection('hidden-message');
+                shuttleClicks = 0;
+            }
+        });
+
+        document.body.addEventListener('click', () => {
+            document.body.style.backgroundColor = '#1a5c1a';
+            setTimeout(() => {
+                document.body.style.backgroundColor = '#0f380f';
+            }, 100);
+        });
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes fall {
+                to { transform: translateY(110vh) rotate(720deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
