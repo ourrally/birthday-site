@@ -154,6 +154,19 @@
             font-weight: 600;
             border-bottom: 1px solid rgba(139, 61, 87, 0.35);
         }
+		
+		.complete-line {
+    color: #c93f74;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 8px rgba(201, 63, 116, 0.18);
+}
+
+.close-line {
+    font-weight: 550;
+    color: #000000;
+}
 
         .note-container .btn {
             background: #3a5f3a;
@@ -377,13 +390,17 @@
                 Life might change a lot this year,<br>
                 but I just hope one thing never does <br>
                 <span class="highlight">us being this close.</span><br><br>
+				<span class="close-line">“us being this close.”</span><br><br>
 
                 That’s my only wish.<br><br>
+				
+				Because in so many ways,<br>
+<span class="complete-line">you complete me.❤️❤️❤️</span><br><br>
 
                 To my most favourite human,<br>
                 Happy Birthday ❤️<br>
                 I wish you many, many, many, many, many more happy returns of the day,<br>
-                and to be a part of each of them.<br><br>
+                and to be a part of each one of them.<br><br>
 <span class="signature">— Your girl</span>
             </p>
 
@@ -482,12 +499,18 @@
             launchConfetti();
         }
 
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(sec => {
-                sec.classList.remove('active');
-            });
-            document.getElementById(id).classList.add('active');
-        }
+		function showSection(id) {
+    document.querySelectorAll('.section').forEach(sec => {
+        sec.classList.remove('active');
+    });
+
+    document.getElementById(id).classList.add('active');
+
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
 
         function showScoreboard() {
             document.getElementById('scoreboard').classList.add('visible');
